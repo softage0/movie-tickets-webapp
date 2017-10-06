@@ -4,6 +4,14 @@ import {Nav, Navbar, NavItem} from 'react-bootstrap';
 
 
 class Header extends Component {
+    constructor(props) {
+        super(props);
+
+        this.state = {
+
+        };
+    }
+
     render() {
         const {history} = this.props;
         const propActions = this.props.actions.app;
@@ -18,17 +26,19 @@ class Header extends Component {
                     <Navbar.Toggle />
                 </Navbar.Header>
                 <Navbar.Collapse>
-                    <Nav pullRight>
-                        <NavItem eventKey={1} onClick={() => history.push('/MyPage')}>My Page</NavItem>
-                        {!propStates.accountInfo &&
-                        <NavItem eventKey={2} onClick={() => history.push('/signup')}>Sign Up</NavItem>}
-                        {!propStates.accountInfo &&
-                        <NavItem eventKey={3} onClick={() => history.push('/login')}>Login</NavItem>}
-                        {propStates.accountInfo &&
-                        <NavItem eventKey={4} onClick={propActions.logout}>
-                            {propStates.accountInfo.name} logout
-                        </NavItem>}
-                    </Nav>
+                    {propStates.accountInfo ?
+                        <Nav pullRight>
+                            <NavItem eventKey={1} onClick={() => history.push('/myPage')}>My Page</NavItem>
+                            <NavItem eventKey={2} onClick={propActions.logout}>
+                                {propStates.accountInfo.name} logout
+                            </NavItem>
+                        </Nav>
+                        :
+                        <Nav pullRight>
+                            <NavItem eventKey={3} onClick={() => history.push('/login')}>Login</NavItem>
+                            <NavItem eventKey={4} onClick={() => history.push('/signUp')}>Sign Up</NavItem>
+                        </Nav>
+                    }
                 </Navbar.Collapse>
             </Navbar>
         )

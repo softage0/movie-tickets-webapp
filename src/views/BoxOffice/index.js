@@ -17,9 +17,9 @@ export class BoxOffice extends Component {
             'get',
             '/kobisopenapi/webservice/rest/boxoffice/searchDailyBoxOfficeList.json',
             {
-                key: 'e9b34f61f8fa02867b90eb64c48a855c',
+                key: process.env.REACT_APP_KOBIS_KEY,
                 targetDt: '20171005' || utils.getYyyymmdd(),
-            }
+            },
         ).then(function (response) {
             console.log(response);
         })

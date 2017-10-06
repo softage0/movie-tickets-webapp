@@ -9,6 +9,7 @@ import Header from '../../components/Header';
 // Views
 import BoxOffice from '../../views/BoxOffice';
 import MyPage from '../../views/MyPage';
+import Login from '../../views/Login';
 
 // Actions
 import appActions from './_action';
@@ -23,10 +24,14 @@ class App extends Component {
                     <div className="main-content">
                         <Route exact path='/'
                                render={() => <BoxOffice states={this.props.states} actions={this.props.actions}/>}/>
-                        <Route path='/MyPage'
+                        <Route path='/myPage'
                                render={() => <MyPage states={this.props.states} actions={this.props.actions}/>}/>
-                        <Route path='/signup'
-                               render={() => <BoxOffice states={this.props.states} actions={this.props.actions}/>}/>
+                        <Route path='/login'
+                               render={() => <Login states={this.props.states}
+                                                    actions={this.props.actions} type='login'/>}/>
+                        <Route path='/signUp'
+                               render={() => <Login states={this.props.states}
+                                                    actions={this.props.actions} type='signUp'/>}/>
                     </div>
                 </div>
             </Router>
