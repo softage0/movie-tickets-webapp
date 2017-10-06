@@ -2,9 +2,24 @@
   "name": "movie-tickets-webapp",
   "version": "0.1.0",
   "private": true,
-  "proxy": "http://www.kobis.or.kr/",
+  "proxy": {
+    "/api": {
+      "target": "http://localhost:5000",
+      "pathRewrite": {
+        "^/api": "/"
+      }
+    },
+    "/kobisopenapi": {
+      "target": "http://www.kobis.or.kr/"
+    }
+  },
   "dependencies": {
+    "body-parser": "^1.18.2",
     "bootstrap": "^3.3.7",
+    "dotenv": "^4.0.0",
+    "express": "^4.16.1",
+    "express-session": "^1.15.6",
+    "mongodb": "^2.2.31",
     "react": "^16.0.0",
     "react-bootstrap": "^0.31.3",
     "react-dom": "^16.0.0",
@@ -13,8 +28,12 @@
     "react-scripts": "1.0.14",
     "redux": "^3.7.2"
   },
+  "devDependencies": {
+    "nodemon": "^1.12.1"
+  },
   "scripts": {
     "start": "react-scripts start",
+    "start:server": "nodemon server.js",
     "build": "react-scripts build",
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject"
