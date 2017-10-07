@@ -38,7 +38,11 @@ class Header extends Component {
                 <Navbar.Collapse>
                     {propStates.accountInfo ?
                         <Nav pullRight>
-                            <NavItem eventKey={1} onClick={() => history.push('/myPage')}>My Page</NavItem>
+                            {propStates.accountInfo['type'] === 'admin' ?
+                                <NavItem eventKey={1.1} onClick={() => history.push('/admin')}>Admin Page</NavItem>
+                                :
+                                <NavItem eventKey={1.2} onClick={() => history.push('/myPage')}>My Page</NavItem>
+                            }
                             <NavItem eventKey={2} onClick={this.logout}>
                                 {propStates.accountInfo.name} logout
                             </NavItem>

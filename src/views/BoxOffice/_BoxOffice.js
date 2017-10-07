@@ -20,7 +20,7 @@ export class BoxOffice extends Component {
                 key: process.env.REACT_APP_KOBIS_KEY,
                 targetDt: '20171005' || utils.getYyyymmdd(),
             },
-        ).then(function (response) {
+        ).then((response) => {
             console.log(response);
         })
     }

@@ -43,8 +43,11 @@ export default {
                         default:
                     }
                 } else {
-                    console.error(response);
+                    return response;
                 }
+            }).catch((error) => {
+                console.error('There has been a problem with your fetch operation: ' + error.message);
+                return error;
             });
     },
 
