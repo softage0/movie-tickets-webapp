@@ -10,6 +10,7 @@ import Header from './Header';
 
 // Views
 import BoxOffice from '../../views/BoxOffice';
+import Booking from '../../views/Booking';
 import MyPage from '../../views/MyPage';
 import Admin from '../../views/Admin';
 import Login from '../../views/Login';
@@ -25,7 +26,7 @@ class App extends Component {
         // session check - auto login if session is valid when reloaded
         utils.fetch(
             'get',
-            'api/session',
+            '/api/session',
         ).then(function (response) {
             if (response.account) {
                 propActions.setAccountInfo(response.account);
@@ -41,6 +42,8 @@ class App extends Component {
                     <div className="main-content">
                         <Route exact path='/'
                                render={() => <BoxOffice states={this.props.states} actions={this.props.actions}/>}/>
+                        <Route path='/booking/:_id'
+                               render={() => <Booking states={this.props.states} actions={this.props.actions}/>}/>
                         <Route path='/myPage'
                                render={() => <MyPage states={this.props.states} actions={this.props.actions}/>}/>
                         <Route path='/admin'

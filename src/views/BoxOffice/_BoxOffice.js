@@ -1,4 +1,6 @@
 import React, {Component} from 'react';
+import {withRouter} from 'react-router-dom';
+import {Table, ButtonToolbar, Button} from 'react-bootstrap';
 
 import utils from '../../utils';
 
@@ -8,31 +10,67 @@ export class BoxOffice extends Component {
         super(props);
 
         this.state = {
-            boxOfficeList: [],
-        }
+            movies: [],
+        };
+
+        this.bookMovie = this.bookMovie.bind(this);
     }
 
     componentDidMount() {
         utils.fetch(
             'get',
-            '/kobisopenapi/webservice/rest/boxoffice/searchDailyBoxOfficeList.json',
-            {
-                key: process.env.REACT_APP_KOBIS_KEY,
-                targetDt: '20171005' || utils.getYyyymmdd(),
-            },
-        ).then((response) => {
-            console.log(response);
+            '/api/movies',
+        ).then((movies) => {
+            this.setState({
+                movies,
+            })
         })
     }
 
+    bookMovie(_id) {
+        this.props.history.push('/booking/' + _id);
+    }
+
     render() {
+        const propStates = this.props.states.app;
+
         return (
             <div>
                 <h1>Box Office Status</h1>
-                <p>Please select one of the above functions you want to use.</p>
+                <Table striped bordered condensed hover>
+                    <thead>
+                    <tr>
+                        <th>Title</th>
+                        <th>Theater</th>
+                        <th>Show Times</th>
+                        {
+                            propStates.accountInfo && propStates.accountInfo['type'] === 'customer' &&
+                            <th>Book</th>
+                        }
+
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {
+                        this.state.movies.map((movie) => <tr key={movie['_id']}>
+                            <td>{movie['movieNm']}</td>
+                            <td>{movie['theater']}</td>
+                            <td>{movie['showTime']}</td>
+                                {
+                                    propStates.accountInfo && propStates.accountInfo['type'] === 'customer' &&
+                                    <td>
+                                        <ButtonToolbar>
+                                            <Button bsSize="xsmall" onClick={() => this.bookMovie(movie['_id'])}>Book</Button>
+                                        </ButtonToolbar>
+                                    </td>
+                                }
+                        </tr>)
+                    }
+                    </tbody>
+                </Table>
             </div>
         )
     }
 }
 
-export default BoxOffice;
+export default withRouter(BoxOffice);

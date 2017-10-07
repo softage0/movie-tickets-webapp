@@ -29,7 +29,7 @@ export class BoxOffice extends Component {
         const propStates = this.props.states.app;
 
         if (!propStates.accountInfo || propStates.accountInfo['type'] !== 'admin') {
-            // this.props.history.push('/');
+            this.props.history.push('/');
         }
 
         this.getMovies();
@@ -44,7 +44,7 @@ export class BoxOffice extends Component {
     getMovies() {
         utils.fetch(
             'get',
-            'api/movies',
+            '/api/movies',
         ).then((movies) => {
             this.setState({
                 movies,
@@ -69,7 +69,7 @@ export class BoxOffice extends Component {
     deleteMovie(_id) {
         utils.fetch(
             'delete',
-            'api/movies/' + _id,
+            '/api/movies/' + _id,
         ).then((response) => {
             if(!response || !response.status) {
                 this.cancelEdit();
@@ -84,7 +84,7 @@ export class BoxOffice extends Component {
         if (this.state.mode === 'add') {
             utils.fetch(
                 'post',
-                'api/movies/',
+                '/api/movies/',
                 movieDetails,
             ).then((response) => {
                 if(!response || !response.status) {
@@ -95,7 +95,7 @@ export class BoxOffice extends Component {
         } else {
             utils.fetch(
                 'put',
-                'api/movies/' + movieDetails['_id'],
+                '/api/movies/' + movieDetails['_id'],
                 movieDetails,
             ).then((response) => {
                 if(!response || !response.status) {

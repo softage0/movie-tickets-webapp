@@ -136,15 +136,16 @@ app.get('/logout', function(req, res){
 // movie management
 //
 app.get('/movies', function (req, res) {
-    const movie = req.body;
+    const query = req.query;
 
     MongoClient.connect(mongodbUrl, function(err, db) {
         assert.equal(null, err);
 
         const queries = [];
-        if (movie['movieCd']) queries.push( { 'movieCd': movie['movieCd']});
-        if (movie['theater']) queries.push( { 'theater': movie['theater']});
-        if (movie['showTime']) queries.push( { 'showTime': movie['showTime']});
+        if (query['_id']) queries.push( { '_id': new ObjectId(query['_id'])});
+        if (query['movieCd']) queries.push( { 'movieCd': query['movieCd']});
+        if (query['theater']) queries.push( { 'theater': query['theater']});
+        if (query['showTime']) queries.push( { 'showTime': query['showTime']});
 
         findDocument(db, 'movies', queries.length ? { $and: queries } : {}, function(err, docs) {
             db.close();
@@ -158,6 +159,10 @@ app.get('/movies', function (req, res) {
             ['showTime', 1],
         ]);
     });
+});
+
+app.get('/movies/:_id/:bookerId', function (req, res) {
+    res.send('return one movie info');
 });
 
 app.post('/movies', function (req, res) {
@@ -234,7 +239,7 @@ app.put('/movies/:id', function (req, res) {
 
                     db.close();
 
-                    res.status(201).send('Success: movie schedule modified');
+                    res.status(204).send('Success: movie schedule modified');
                 });
             }
         });
@@ -260,7 +265,89 @@ app.delete('/movies/:id', function (req, res) {
 
             db.close();
 
-            res.status(201).send('Success: movie schedule modified');
+            res.status(204).send('Success: movie schedule modified');
+        });
+    });
+});
+
+
+//
+// booking management
+//
+app.get('/booking/:movieScheduleId/:userId', function (req, res) {
+    const movieScheduleId = req.params['movieScheduleId'];
+    const userId = req.params['userId'];
+
+    MongoClient.connect(mongodbUrl, function(err, db) {
+        assert.equal(null, err);
+
+        const queries = [
+            {movieScheduleId: movieScheduleId},
+            {userId: userId},
+        ];
+
+        findDocument(db, 'booking', queries.length ? { $and: queries } : {}, function(err, docs) {
+            db.close();
+
+            if (!err) {
+                res.json(docs[0]);
+            }
+        });
+    });
+});
+
+app.post('/booking/:movieScheduleId/:userId', function (req, res) {
+    const movieScheduleId = req.params['movieScheduleId'];
+    const userId = req.params['userId'];
+    const selectedSeats = req.body['selectedSeats'];
+    console.log(selectedSeats);
+
+    if(!movieScheduleId || !userId){
+        res.status(500).json({
+            error: 'invalid request',
+        });
+        return;
+    }
+
+    MongoClient.connect(mongodbUrl, function(err, db) {
+        assert.equal(null, err);
+
+        const queries = [];
+        if (movieScheduleId) queries.push({movieScheduleId: movieScheduleId});
+        if (userId) queries.push({userId: userId});
+
+        const data = {
+            movieScheduleId,
+            userId,
+            selectedSeats,
+        };
+
+        db.collection('booking').updateOne({$and: queries}, {$set: data}, {
+            upsert: true
+        }, function(err, r) {
+            assert.equal(null, err);
+            assert.equal(1, r.upsertedCount);
+
+            db.close();
+
+            res.status(204).send('Success: booking info upserted');
+        });
+
+        findDocument(db, 'booking', { $and: queries }, function(err, docs) {
+            if (!err) {
+                if(docs.length){
+                    res.status(409).json({
+                        error: 'conflict',
+                    });
+                    return;
+                }
+
+                insertDocument(db, 'movies', movie, function () {
+                    db.close();
+
+                    res.status(201).send('Success: movie schedule added');
+                });
+            }
         });
     });
 });

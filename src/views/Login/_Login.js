@@ -47,7 +47,7 @@ export class Login extends Component {
 
         utils.fetch(
             'post',
-            type === 'login' ? 'api/login' : 'api/signUp',
+            type === 'login' ? '/api/login' : '/api/signUp',
             params,
         ).then(function (response) {
             propActions.setAccountInfo(response);

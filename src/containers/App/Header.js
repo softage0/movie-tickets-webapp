@@ -17,7 +17,7 @@ class Header extends Component {
 
         utils.fetch(
             'get',
-            'api/logout',
+            '/api/logout',
         ).then(function () {
             propActions.setAccountInfo();
         });
@@ -28,7 +28,7 @@ class Header extends Component {
         const propStates = this.props.states.app;
 
         return (
-            <Navbar inverse collapseOnSelect>
+            <Navbar fixedTop inverse collapseOnSelect>
                 <Navbar.Header>
                     <Navbar.Brand>
                         <Link to='/'>Movie Tickets</Link>
