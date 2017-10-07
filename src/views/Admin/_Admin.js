@@ -60,10 +60,22 @@ export class BoxOffice extends Component {
     }
 
     editMovie(_id) {
+        this.setState({
+            mode: 'edit',
+            movieDetails: this.state.movies.filter((movie) => movie['_id'] === _id)[0],
+        })
     }
 
     deleteMovie(_id) {
-
+        utils.fetch(
+            'delete',
+            'api/movies/' + _id,
+        ).then((response) => {
+            if(!response || !response.status) {
+                this.cancelEdit();
+                this.getMovies();
+            }
+        });
     }
 
     saveMovie() {
@@ -75,7 +87,7 @@ export class BoxOffice extends Component {
                 'api/movies/',
                 movieDetails,
             ).then((response) => {
-                if(!response.status) {
+                if(!response || !response.status) {
                     this.cancelEdit();
                     this.getMovies();
                 }
@@ -86,7 +98,7 @@ export class BoxOffice extends Component {
                 'api/movies/' + movieDetails['_id'],
                 movieDetails,
             ).then((response) => {
-                if(!response.status) {
+                if(!response || !response.status) {
                     this.cancelEdit();
                     this.getMovies();
                 }
@@ -102,6 +114,23 @@ export class BoxOffice extends Component {
     }
 
     render() {
+        let movies = this.state.movies;
+
+        if (this.state.mode === 'edit') {
+            const editingId = this.state.movieDetails['_id'];
+            movies = [];
+
+            this.state.movies.forEach((movie) => {
+                movies.push(movie);
+                if (movie['_id'] === editingId) {
+                    movies.push({
+                        type: 'editor',
+                    })
+                }
+            })
+
+        }
+
         return (
             <div>
                 <h1>Admin Page - Movie Management</h1>
@@ -116,21 +145,34 @@ export class BoxOffice extends Component {
                     </thead>
                     <tbody>
                     {
-                        this.state.movies.map((movie) => <tr key={movie['_id']}>
-                            <td>{movie['movieNm']}</td>
-                            <td>{movie['theater']}</td>
-                            <td>{movie['showTime']}</td>
-                            <td>
-                                <ButtonToolbar>
-                                    <Button bsSize="xsmall" onClick={() => this.editMovie(movie['_id'])}>Edit</Button>
-                                    <Button bsSize="xsmall" onClick={() => this.deleteMovie(movie['_id'])}>Delete</Button>
-                                </ButtonToolbar>
-                            </td>
-                        </tr>)
+                        movies.map((movie) => {
+                            if (movie['type'] && movie['type'] === 'editor') {
+                                return <tr key={'editor'} className='movie-editor'>
+                                    <td colSpan={4}>
+                                        <MovieEditor
+                                            movieDetails={this.state.movieDetails}
+                                            onChange={this.onChangeMovieDetails}
+                                        />
+                                    </td>
+                                </tr>
+                            } else {
+                                return <tr key={movie['_id']}>
+                                    <td>{movie['movieNm']}</td>
+                                    <td>{movie['theater']}</td>
+                                    <td>{movie['showTime']}</td>
+                                    <td>
+                                        <ButtonToolbar>
+                                            <Button bsSize="xsmall" onClick={() => this.editMovie(movie['_id'])}>Edit</Button>
+                                            <Button bsSize="xsmall" onClick={() => this.deleteMovie(movie['_id'])}>Delete</Button>
+                                        </ButtonToolbar>
+                                    </td>
+                                </tr>
+                            }
+                        })
                     }
                     {
                         this.state.mode === 'add' &&
-                            <tr>
+                            <tr className='movie-editor'>
                                 <td colSpan={4}>
                                     <MovieEditor
                                         onChange={this.onChangeMovieDetails}

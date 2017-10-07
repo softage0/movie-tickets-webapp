@@ -13,13 +13,15 @@ class MovieEditor extends Component {
             boxOfficeList: [],
             theaters: ['CGV', 'Lotte Cinema', 'Megabox'],
             showTimes: ['7AM', '12PM', '3PM', '9PM'],
-            movieDetails: null,
+            movieDetails: {},
         };
 
         this.handleChange = this.handleChange.bind(this);
     }
 
     componentDidMount() {
+        const {movieDetails} = this.props;
+
         // get active movie list from `kobis.or.kr`
         utils.fetch(
             'get',
@@ -31,8 +33,32 @@ class MovieEditor extends Component {
         ).then((response) => {
             this.setState({
                 boxOfficeList: response['boxOfficeResult']['dailyBoxOfficeList'],
+            }, () => {
+                if (movieDetails) {
+                    this.setState({
+                        movieDetails,
+                    }, () => {
+                        if (this.props.onChange) {
+                            this.props.onChange(this.state.movieDetails);
+                        }
+                    });
+                }
             })
         })
+    }
+
+    componentWillReceiveProps(nextProps) {
+        const {movieDetails} = nextProps;
+
+        if (movieDetails !== this.props.movieDetails) {
+            this.setState({
+                movieDetails,
+            }, () => {
+                if (this.props.onChange) {
+                    this.props.onChange(this.state.movieDetails);
+                }
+            });
+        }
     }
 
     handleChange(event) {
@@ -57,10 +83,13 @@ class MovieEditor extends Component {
     }
 
     render() {
+        const {movieDetails} = this.state;
+
         return (
             <Form componentClass="fieldset" horizontal>
                 <FieldGroup
                     id="movieCd"
+                    value={movieDetails['movieCd']}
                     type="text"
                     label="Title"
                     componentClass="select"
@@ -73,6 +102,7 @@ class MovieEditor extends Component {
                 </FieldGroup>
                 <FieldGroup
                     id="theater"
+                    value={movieDetails['theater']}
                     type="text"
                     label="Theater"
                     componentClass="select"
@@ -85,6 +115,7 @@ class MovieEditor extends Component {
                 </FieldGroup>
                 <FieldGroup
                     id="showTime"
+                    value={movieDetails['showTime']}
                     type="text"
                     label="Show Time"
                     componentClass="select"

@@ -6,7 +6,9 @@ const bodyParser = require('body-parser');
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-const MongoClient = require('mongodb').MongoClient;
+const mongo = require('mongodb');
+const MongoClient = mongo.MongoClient;
+const ObjectId = mongo.ObjectID;
 const mongodbUrl = process.env.MONGOLAB_URI;
 const assert = require('assert');
 
@@ -191,6 +193,74 @@ app.post('/movies', function (req, res) {
                     res.status(201).send('Success: movie schedule added');
                 });
             }
+        });
+    });
+});
+
+app.put('/movies/:id', function (req, res) {
+    const movie = Object.assign({}, req.body);
+    delete movie._id;
+
+    if(!req.params.id){
+        res.status(500).json({
+            error: 'invalid request',
+        });
+        return;
+    }
+
+    MongoClient.connect(mongodbUrl, function(err, db) {
+        assert.equal(null, err);
+
+        const queries = [];
+        if (movie['movieCd']) queries.push( { 'movieCd': movie['movieCd']});
+        if (movie['theater']) queries.push( { 'theater': movie['theater']});
+        if (movie['showTime']) queries.push( { 'showTime': movie['showTime']});
+
+        findDocument(db, 'movies', { $and: queries }, function(err, docs) {
+            if (!err) {
+                if(docs.length){
+                    res.status(409).json({
+                        error: 'conflict',
+                    });
+                    return;
+                }
+
+                const col = db.collection('movies');
+
+                col.updateOne({_id: new ObjectId(req.params.id)}, {$set: movie}, function(err, r) {
+                    assert.equal(null, err);
+                    assert.equal(1, r.matchedCount);
+                    assert.equal(1, r.modifiedCount);
+
+                    db.close();
+
+                    res.status(201).send('Success: movie schedule modified');
+                });
+            }
+        });
+    });
+});
+
+app.delete('/movies/:id', function (req, res) {
+    if(!req.params.id){
+        res.status(500).json({
+            error: 'invalid request',
+        });
+        return;
+    }
+
+    MongoClient.connect(mongodbUrl, function(err, db) {
+        assert.equal(null, err);
+
+        const col = db.collection('movies');
+
+        col.deleteOne({_id: new ObjectId(req.params.id)}, function(err, r) {
+            assert.equal(null, err);
+            assert.equal(1, r.deletedCount);
+
+            db.close();
+
+            res.status(201).send('Success: movie schedule modified');
         });
     });
 });
