@@ -50,8 +50,6 @@ app.post('/signUp', function (req, res) {
         assert.equal(null, err);
 
         findDocument(db, 'accounts', { id: account['id'] }, function(err, docs) {
-            db.close();
-
             if (!err) {
                 if(docs.length){
                     res.status(409).json({
@@ -86,15 +84,15 @@ app.post('/login', function (req, res) {
         findDocument(db, 'accounts', { id: account['id'] }, function(err, docs) {
             db.close();
 
-            if (!err && docs.length) {
-                const doc = docs[0];
-
-                if(!doc['id']){
+            if (!err) {
+                if(!docs.length){
                     res.status(404).json({
                         error: 'not found',
                     });
                     return;
                 }
+
+                const doc = docs[0];
 
                 if(doc['password'] !== account['password']){
                     res.status(412).json({
@@ -107,6 +105,8 @@ app.post('/login', function (req, res) {
                 session.account = doc;
 
                 res.json(doc);
+            } else {
+
             }
         });
     });
@@ -114,7 +114,6 @@ app.post('/login', function (req, res) {
 
 app.get('/logout', function(req, res){
     const session = req.session;
-    console.log(session);
     if(session.account){
         req.session.destroy(function(err){
             if(err){
@@ -135,6 +134,7 @@ app.listen(app.get('port'), function() {
 
 
 const insertDocument = function(db, collection, data, callback) {
+    console.log(data);
     db.collection(collection).insertOne(data, function(err, result) {
         assert.equal(err, null);
         console.log(err);

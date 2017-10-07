@@ -36,11 +36,11 @@ export class Login extends Component {
     submit() {
         const {type, history} = this.props;
         const propActions = this.props.actions.app;
-        const params = this.state;
+        let params = this.state;
 
 
         if (type === 'signUp') {
-            Object.assign({}, this.state, {
+            params = Object.assign({}, params, {
                 type: 'customer',
             });
         }
@@ -51,7 +51,7 @@ export class Login extends Component {
             params,
         ).then(function (response) {
             propActions.setAccountInfo(response);
-            history.push('/');
+            type === 'login' ? history.push('/') : history.push('/login');
         });
     }
 
