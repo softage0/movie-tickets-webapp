@@ -17,6 +17,7 @@ export class BoxOffice extends Component {
         };
 
         this.onChangeMovieDetails = this.onChangeMovieDetails.bind(this);
+        this.getMovies = this.getMovies.bind(this);
         this.addMovie = this.addMovie.bind(this);
         this.editMovie = this.editMovie.bind(this);
         this.deleteMovie = this.deleteMovie.bind(this);
@@ -31,35 +32,24 @@ export class BoxOffice extends Component {
             // this.props.history.push('/');
         }
 
+        this.getMovies();
+    }
+
+    onChangeMovieDetails(movieDetails) {
+        this.setState({
+            movieDetails,
+        });
+    }
+
+    getMovies() {
         utils.fetch(
             'get',
             'api/movies',
         ).then((movies) => {
-            movies = [
-                {
-                    title: 'Kill Bill',
-                    theaters: ['Lotte', 'CGV'],
-                    showTimes: ['1pm', '2pm']
-                },
-                {
-                    title: 'Kill Bill 2',
-                    theaters: ['Lotte'],
-                    showTimes: ['1pm', '2pm']
-                }
-            ];
-
             this.setState({
                 movies,
             })
         })
-
-    }
-
-    onChangeMovieDetails(movieDetails) {
-        console.log(movieDetails);
-        this.setState({
-            movieDetails,
-        });
     }
 
     addMovie() {
@@ -82,18 +72,24 @@ export class BoxOffice extends Component {
         if (this.state.mode === 'add') {
             utils.fetch(
                 'post',
-                'api/movie/',
+                'api/movies/',
                 movieDetails,
             ).then((response) => {
-                console.log(response);
+                if(!response.status) {
+                    this.cancelEdit();
+                    this.getMovies();
+                }
             });
         } else {
             utils.fetch(
                 'put',
-                'api/movie/' + movieDetails['_id'],
+                'api/movies/' + movieDetails['_id'],
                 movieDetails,
             ).then((response) => {
-                console.log(response);
+                if(!response.status) {
+                    this.cancelEdit();
+                    this.getMovies();
+                }
             });
         }
     }
@@ -121,9 +117,9 @@ export class BoxOffice extends Component {
                     <tbody>
                     {
                         this.state.movies.map((movie) => <tr key={movie['_id']}>
-                            <td>{movie['title']}</td>
-                            <td>{movie['theaters']}</td>
-                            <td>{movie['showTimes']}</td>
+                            <td>{movie['movieNm']}</td>
+                            <td>{movie['theater']}</td>
+                            <td>{movie['showTime']}</td>
                             <td>
                                 <ButtonToolbar>
                                     <Button bsSize="xsmall" onClick={() => this.editMovie(movie['_id'])}>Edit</Button>
