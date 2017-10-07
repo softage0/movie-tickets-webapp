@@ -1,6 +1,15 @@
 import React, {Component} from 'react';
+import {withRouter} from 'react-router-dom';
+
 
 export class MyPage extends Component {
+    componentDidUpdate() {
+        const propStates = this.props.states.app;
+
+        // if it's not logged in, it will redirect to login page
+        !propStates.accountInfo && this.props.history.push('/login');
+    }
+
     render () {
         return (
             <div>
@@ -11,4 +20,4 @@ export class MyPage extends Component {
     }
 }
 
-export default MyPage;
+export default withRouter(MyPage);

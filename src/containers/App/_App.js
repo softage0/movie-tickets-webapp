@@ -3,6 +3,8 @@ import {BrowserRouter as Router, Route} from 'react-router-dom';
 import {bindActionCreators} from 'redux';
 import {connect} from 'react-redux';
 
+import utils from '../../utils';
+
 // components
 import Header from './Header';
 
@@ -16,6 +18,20 @@ import appActions from './_action';
 
 
 class App extends Component {
+    componentDidMount() {
+        const propActions = this.props.actions.app;
+
+        // session check - auto login if session is valid when reloaded
+        utils.fetch(
+            'get',
+            'api/session',
+        ).then(function (response) {
+            if (response.account) {
+                propActions.setAccountInfo(response.account);
+            }
+        });
+    }
+
     render() {
         return (
             <Router>

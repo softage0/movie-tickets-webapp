@@ -1,4 +1,5 @@
 import React, {Component} from 'react';
+import {withRouter} from 'react-router-dom';
 import {Form, Button} from 'react-bootstrap';
 
 import utils from '../../utils';
@@ -19,6 +20,13 @@ export class Login extends Component {
         this.submit = this.submit.bind(this);
     }
 
+    componentDidMount() {
+        const propStates = this.props.states.app;
+
+        // if it's already logged in, it will redirect to main page
+        propStates.accountInfo && this.props.history.push('/');
+    }
+
     handleChange(event) {
         this.setState({
             [event.target.id]: event.target.value,
@@ -26,8 +34,10 @@ export class Login extends Component {
     }
 
     submit() {
-        const {type} = this.props;
+        const {type, history} = this.props;
+        const propActions = this.props.actions.app;
         const params = this.state;
+
 
         if (type === 'signUp') {
             Object.assign({}, this.state, {
@@ -40,8 +50,9 @@ export class Login extends Component {
             type === 'login' ? 'api/login' : 'api/signUp',
             params,
         ).then(function (response) {
-            console.log(response);
-        })
+            propActions.setAccountInfo(response);
+            history.push('/');
+        });
     }
 
     render() {
@@ -82,4 +93,4 @@ export class Login extends Component {
     }
 }
 
-export default Login;
+export default withRouter(Login);

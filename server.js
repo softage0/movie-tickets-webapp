@@ -32,6 +32,10 @@ app.get('/', function(req, res) {
     res.send('API Server root - It\'s working.');
 });
 
+app.get('/session', function(req, res) {
+    res.json(req.session);
+});
+
 app.post('/signUp', function (req, res) {
     const account = req.body;
 
@@ -59,7 +63,7 @@ app.post('/signUp', function (req, res) {
                 insertDocument(db, 'accounts', account, function () {
                     db.close();
 
-                    res.send('Success: account added');
+                    res.status(201).send('Success: account added');
                 });
             }
         });
@@ -100,15 +104,30 @@ app.post('/login', function (req, res) {
                 }
 
                 const session = req.session;
-                session.id = doc['id'];
-                session.password = doc['password'];
-                session.name = doc['name'];
+                session.account = doc;
 
                 res.json(doc);
             }
         });
     });
 });
+
+app.get('/logout', function(req, res){
+    const session = req.session;
+    console.log(session);
+    if(session.account){
+        req.session.destroy(function(err){
+            if(err){
+                console.log(err);
+            }else{
+                res.send('Success: account logged out');
+            }
+        })
+    }else{
+        res.send('Success: account already logged out');
+    }
+});
+
 
 app.listen(app.get('port'), function() {
     console.log('Node app is running on port', app.get('port'));

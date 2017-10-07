@@ -2,21 +2,33 @@ import React, {Component} from 'react';
 import {Link, withRouter} from 'react-router-dom';
 import {Nav, Navbar, NavItem} from 'react-bootstrap';
 
+import utils from '../../utils';
+
 
 class Header extends Component {
     constructor(props) {
         super(props);
 
-        this.state = {
+        this.logout = this.logout.bind(this);
+    }
 
-        };
+    logout() {
+        const propActions = this.props.actions.app;
+
+        utils.fetch(
+            'get',
+            'api/logout',
+        ).then(function (response) {
+            console.log(response);
+            propActions.setAccountInfo();
+        });
     }
 
     render() {
         const {history} = this.props;
-        const propActions = this.props.actions.app;
         const propStates = this.props.states.app;
 
+        console.log(propStates);
         return (
             <Navbar inverse collapseOnSelect>
                 <Navbar.Header>
@@ -29,7 +41,7 @@ class Header extends Component {
                     {propStates.accountInfo ?
                         <Nav pullRight>
                             <NavItem eventKey={1} onClick={() => history.push('/myPage')}>My Page</NavItem>
-                            <NavItem eventKey={2} onClick={propActions.logout}>
+                            <NavItem eventKey={2} onClick={this.logout}>
                                 {propStates.accountInfo.name} logout
                             </NavItem>
                         </Nav>
