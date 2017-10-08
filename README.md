@@ -21,13 +21,13 @@ $ cd algorithm-trading-webapp
 $ npm install                   # Install Node modules listed in ./package.json (may take a while the first time)
 ```
 
-환경 별 설정정보를 관리/사용하기 위하여 `.env` 파일을 생성한다. `.env` 파일은 아래와 같은 정보를 포함한다.
+외부에 노출되어서는 안되는 정보나 환경 별 설정정보를 관리/사용하기 위하여 `.env` 파일을 생성한다. `.env` 파일은 아래와 같은 정보를 포함한다.
 
 ```
 REACT_APP_KOBIS_KEY={http://www.kobis.or.kr/kobisopenapi/ 발급받은 키}
 MONGOLAB_URI={id/password를 포함한 MongoDB 접근 URI}
 MONGOLAB_SECRET_KEY={MongoDB unique key - 임의의 문자열로 설정}
-PORT={서버를 실행할 port. default: 5000. production에서는 80으로 설정하면 브라우저에서 접근이 용이하다.}
+PORT={Optional. 서버를 실행할 port. default: 5000. production에서 80으로 설정하면 브라우저에서 접근이 용이하다.}
 ```
 
 
@@ -45,7 +45,7 @@ $ npm start
 $ npm run start:server
 ```
 
-위와 같이 실행 후 브라우저에서 `localhost:3000`으로 접근하면 Front-end 코드에 접근되고 존재하지 않은 요청 시 `localhost:5000`으로 proxy 하므로 `/api`, `/kobisopenapi` 등의 요청은 5000번 포트에서 실행 중인 Node.js 코드에서 처리하게 된다.
+위와 같이 실행 후 **브라우저에서 `localhost:3000`으로 접근**하면 Front-end 코드에 접근되고 존재하지 않은 요청 시 `localhost:5000`으로 proxy 하므로 `/api`, `/kobisopenapi` 등의 요청은 5000번 포트에서 실행 중인 Node.js 코드에서 처리하게 된다.
 
 > `package.json`에 있는 개발용 proxy 환경 설정
 > ```
@@ -68,18 +68,19 @@ $ npm run build
 
 Back-end 코드는 `{project-root}/server.js` 파일 하나로 되어 있으며 아래 내용을 포함하고 있다.
 
-```nodejs
+```node
 // `/kobisopenapi`로 접근 시 Open API로 proxy
 const proxy = require('http-proxy-middleware');
 app.use(proxy('/kobisopenapi', {target: 'http://www.kobis.or.kr/'}));
 
 // 선언되지 않은 요청 시 (`/api/*`, `/kobisopenapi`를 제외한 모든 요청) `/build`로 proxy
 app.use(express.static(__dirname + '/build'));
+```
+
+결과적으로 `{project-root}/build`에 Front-end 코드 생성 후 **아래 커맨드로 Bank-end 서버를 실행**하면 `/api`, `/kobisopenapi`는 API를 호출하고 그 외의 Front-end static 코드는 `{project-root}/build`를 호출하게 된다.
 ```shell
 $ node server.js
 ```
-
-결과적으로 `{project-root}/build`에 Front-end 코드 생성 후 아래 커맨드로 Bank-end 서버를 실행하면 `/api`, `/kobisopenapi`는 API를 호출하고 그 외의 Front-end static 코드는 `{project-root}/build` 하게 된다.
 
 ### 배포 방법
 
