@@ -386,6 +386,8 @@ app.post('/booking/:movieScheduleId/:accountId', function (req, res) {
     const movieScheduleId = req.params['movieScheduleId'];
     const accountId = req.params['accountId'];
     const seats = req.body['seats'];
+    const bookingSeats = req.body['bookingSeats'];
+    const cancelingSeats = req.body['cancelingSeats'];
 
     if(!movieScheduleId || !accountId){
         res.status(500).json({
@@ -407,13 +409,68 @@ app.post('/booking/:movieScheduleId/:accountId', function (req, res) {
             seats,
         };
 
+        // upsert booking info
         db.collection('booking').updateOne({$and: queries}, {$set: data}, {
             upsert: true
         }, function(err) {
             assert.equal(null, err);
-            db.close();
 
-            res.status(204).send('Success: booking info upserted');
+            // update booking history
+            const data = {
+                movieScheduleId,
+                accountId,
+                overallBookedSeats: seats,
+                bookedSeats: bookingSeats,
+                canceledSeats: cancelingSeats,
+                timestamp: new Date(),
+            };
+
+            db.collection('bookingHistory').insertOne(data, function(err) {
+                assert.equal(null, err);
+                db.close();
+
+                res.status(204).send('Success: booking info updated');
+            });
+        });
+    });
+});
+
+app.get('/bookingHistory/', function (req, res) {
+    const accountId = req.query['accountId'];
+    const movieScheduleId = req.query['movieScheduleId'];
+
+    MongoClient.connect(mongodbUrl, function(err, db) {
+        assert.equal(null, err);
+
+        const queries = [];
+        if (accountId) queries.push( { accountId: accountId});
+        if (movieScheduleId) queries.push( { movieScheduleId: movieScheduleId});
+
+        db.collection('bookingHistory').find(queries.length ? { $and: queries } : {}).toArray(function(err, historyData) {
+            assert.equal(null, err);
+
+            // added movie info to history
+            db.collection('movies').find().toArray(function (err, moviesData) {
+                assert.equal(null, err);
+                db.close();
+
+                const moviesObjects = {};
+                moviesData.forEach((movie) => {
+                    moviesObjects[movie['_id']] = {
+                        movieCd: movie['movieCd'],
+                        movieNm: movie['movieNm'],
+                        theater: movie['theater'],
+                        showTime: movie['showTime'],
+                    }
+                });
+
+                const returnData = [];
+                historyData.forEach((history) => {
+                    returnData.push(Object.assign({}, history, moviesObjects[history['movieScheduleId']]))
+                });
+
+                res.json(returnData);
+            });
         });
     });
 });

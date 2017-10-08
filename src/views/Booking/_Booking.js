@@ -76,11 +76,21 @@ export class Booking extends Component {
     }
 
     bookSeats() {
+        const overallBookingSeats = [];
         const bookingSeats = [];
+        const cancelingSeats = [];
 
         for (let [key, value] of Object.entries(this.state.seatsStatus)) {
             if (value === 'selected' || value === 'myBooked') {
+                overallBookingSeats.push(key);
+            }
+
+            if (value === 'selected') {
                 bookingSeats.push(key);
+            }
+
+            if (value === 'canceled') {
+                cancelingSeats.push(key);
             }
         }
 
@@ -88,7 +98,9 @@ export class Booking extends Component {
             'post',
             '/api/booking/' + this.props.match.params['_id'] + '/' + this.props.states.app.accountInfo['id'],
             {
-                seats: bookingSeats,
+                seats: overallBookingSeats,
+                bookingSeats,
+                cancelingSeats,
             }
         ).then(() => {
             this.getMovie();
