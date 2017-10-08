@@ -166,16 +166,15 @@ app.get('/movies', function (req, res) {
                         const bookingPerMovies = {};
                         bookingInfo.forEach((booking) => {
                             if (bookingPerMovies[booking['movieScheduleId']]) {
-                                bookingPerMovies[booking['movieScheduleId']] = Object
-                                    .assign({}, bookingPerMovies[booking['movieScheduleId']], booking['seats']);
+                                bookingPerMovies[booking['movieScheduleId']]['bookedSeats'].push(...booking['seats']);
                             } else {
                                 bookingPerMovies[booking['movieScheduleId']] = {};
-                                bookingPerMovies[booking['movieScheduleId']]['bookedSeats'] = booking['seats'];
+                                bookingPerMovies[booking['movieScheduleId']]['bookedSeats'] = [...booking['seats']];
                             }
 
                             // if bookerId is given, booker's booked seats will be reserved as `myBookedSeats`
                             if (booking['accountId'] === bookerId) {
-                                bookingPerMovies[booking['movieScheduleId']]['myBookedSeats'] = booking['seats'];
+                                bookingPerMovies[booking['movieScheduleId']]['myBookedSeats'] = [...booking['seats']];
                             }
                         });
 
@@ -213,38 +212,26 @@ app.get('/movies/:_id/:bookerId', function (req, res) {
             const bookingCol = db.collection('booking');
 
             // get booked seats info
-            bookingCol.findOne({movieScheduleId: _id}, function(err, bookInfo) {
+            bookingCol.find({movieScheduleId: _id}).toArray(function(err, bookingsInfo) {
                 assert.equal(null, err);
+                db.close();
 
-                const returnData = bookInfo ?
-                    Object.assign({}, movieInfo, {
-                        bookedSeats: bookInfo['seats'],
-                    })
-                    :
-                    movieInfo;
+                const bookingPerMovie = {};
+                bookingsInfo.forEach((booking) => {
+                    if (bookingPerMovie['bookedSeats']) {
+                        bookingPerMovie['bookedSeats'].push(...booking['seats']);
+                    } else {
+                        bookingPerMovie['bookedSeats'] = [...booking['seats']];
+                    }
 
-                // If bookerId is given, myBookedSeats will be added.
-                if (bookerId) {
-                    bookingCol.findOne({
-                        $and: [{
-                            movieScheduleId: _id,
-                            accountId: bookerId,
-                        }],
-                    }, function(err, myBookInfo) {
-                        assert.equal(null, err);
-                        db.close();
+                    // if bookerId is given, booker's booked seats will be reserved as `myBookedSeats`
+                    if (booking['accountId'] === bookerId) {
+                        bookingPerMovie['myBookedSeats'] = [...booking['seats']];
+                    }
+                });
 
-                        if (myBookInfo) {
-                            returnData['myBookedSeats'] = myBookInfo['seats'];
-                        }
-
-                        res.json(returnData);
-                    });
-                } else {
-                    db.close();
-
-                    res.json(returnData);
-                }
+                // reserved booked seats are added to each movie info and return
+                res.json(Object.assign({}, movieInfo, bookingPerMovie));
             });
         });
     });

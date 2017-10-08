@@ -27,9 +27,9 @@ export class Booking extends Component {
 
         if (!propStates.accountInfo || propStates.accountInfo['type'] !== 'customer') {
             this.props.history.push('/');
+        } else {
+            this.getMovie();
         }
-
-        this.getMovie();
     }
 
     toggleSelection(seatId) {
@@ -180,8 +180,7 @@ export class Booking extends Component {
                                             </td>;
                                         case 'booked':
                                             return <td key={column}
-                                                       className='booked'
-                                                       onClick={() => this.toggleSelection(seatId)}>
+                                                       className='booked'>
                                                 {seatId}
                                             </td>;
                                         default:

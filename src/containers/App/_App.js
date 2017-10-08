@@ -11,7 +11,6 @@ import Header from './Header';
 // Views
 import BoxOffice from '../../views/BoxOffice';
 import Booking from '../../views/Booking';
-import MyPage from '../../views/MyPage';
 import Admin from '../../views/Admin';
 import Login from '../../views/Login';
 
@@ -44,8 +43,6 @@ class App extends Component {
                                render={() => <BoxOffice states={this.props.states} actions={this.props.actions}/>}/>
                         <Route path='/booking/:_id'
                                render={() => <Booking states={this.props.states} actions={this.props.actions}/>}/>
-                        <Route path='/myPage'
-                               render={() => <MyPage states={this.props.states} actions={this.props.actions}/>}/>
                         <Route path='/admin'
                                render={() => <Admin states={this.props.states} actions={this.props.actions}/>}/>
                         <Route path='/login'

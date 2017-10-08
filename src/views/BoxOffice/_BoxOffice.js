@@ -14,11 +14,23 @@ export class BoxOffice extends Component {
             bookingHistory: null,
         };
 
+        this.getDashboardInfo = this.getDashboardInfo.bind(this);
         this.bookMovie = this.bookMovie.bind(this);
     }
 
     componentDidMount() {
-        const accountInfo = this.props.states.app.accountInfo;
+        this.getDashboardInfo();
+    }
+
+    componentWillReceiveProps(nextProps) {
+        if (nextProps.states.app.accountInfo !== this.props.states.app.accountInfo) {
+            this.getDashboardInfo(nextProps);
+        }
+    }
+
+    getDashboardInfo(nextProps) {
+        const props = nextProps || this.props;
+        const accountInfo = props.states.app.accountInfo;
         const accountId = accountInfo && accountInfo['id'];
 
         utils.fetch(
@@ -49,8 +61,6 @@ export class BoxOffice extends Component {
                 })
             }
         });
-
-
     }
 
     bookMovie(_id) {
@@ -72,7 +82,7 @@ export class BoxOffice extends Component {
                                 <th>Title</th>
                                 <th>Theater</th>
                                 <th>Show Times</th>
-                                <th>Booked Seats</th>
+                                <th>All Booked Seats</th>
                                 <th>My Booked Seats</th>
                                 <th>Book</th>
                             </tr>
@@ -117,7 +127,7 @@ export class BoxOffice extends Component {
                         </Table>
                 }
                 {
-                    bookingHistory &&
+                    bookingHistory && propStates.accountInfo &&
                         <div>
                             {
                                 propStates.accountInfo && propStates.accountInfo['type'] === 'customer' ?
