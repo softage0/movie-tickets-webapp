@@ -23,6 +23,9 @@ app.use(session({
 
 app.set('port', (process.env.PORT || 5000));
 
+const proxy = require('http-proxy-middleware');
+app.use(proxy('/kobisopenapi', {target: 'http://www.kobis.or.kr/'}));
+
 app.use(express.static(__dirname + '/build'));
 
 MongoClient.connect(mongodbUrl, function(err, db) {
@@ -33,6 +36,7 @@ MongoClient.connect(mongodbUrl, function(err, db) {
 
 const apiRouter = express.Router();
 const API_PREFIX = '/api';
+
 
 //
 // login and session

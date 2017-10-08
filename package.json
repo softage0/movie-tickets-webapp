@@ -2,20 +2,14 @@
   "name": "movie-tickets-webapp",
   "version": "0.1.0",
   "private": true,
-  "proxy": {
-    "/api": {
-      "target": "http://localhost:5000"
-    },
-    "/kobisopenapi": {
-      "target": "http://www.kobis.or.kr/"
-    }
-  },
+  "proxy": "http://localhost:5000",
   "dependencies": {
     "body-parser": "^1.18.2",
     "bootstrap": "^3.3.7",
     "dotenv": "^4.0.0",
     "express": "^4.16.1",
     "express-session": "^1.15.6",
+    "http-proxy-middleware": "^0.17.4",
     "mongodb": "^2.2.31",
     "react": "^16.0.0",
     "react-bootstrap": "^0.31.3",
