@@ -26,7 +26,7 @@ export class Booking extends Component {
         const propStates = this.props.states.app;
 
         if (!propStates.accountInfo || propStates.accountInfo['type'] !== 'customer') {
-            // this.props.history.push('/');
+            this.props.history.push('/');
         }
 
         this.getMovie();
@@ -56,8 +56,7 @@ export class Booking extends Component {
     getMovie() {
         utils.fetch(
             'get',
-            '/api/movies/' + this.props.match.params['_id'] + '/wonju',
-            // '/api/movies/' + this.props.match.params['_id'] + '/' + this.props.states.app.accountInfo['id'],
+            '/api/movies/' + this.props.match.params['_id'] + '/' + this.props.states.app.accountInfo['id'],
         ).then((movieDetails) => {
             const bookedSeatsStatus = {};
 
@@ -87,8 +86,7 @@ export class Booking extends Component {
 
         utils.fetch(
             'post',
-            '/api/booking/' + this.props.match.params['_id'] + '/wonju',
-            // '/api/booking/' + this.props.match.params['_id'] + '/' + this.props.states.app.accountInfo['id'],
+            '/api/booking/' + this.props.match.params['_id'] + '/' + this.props.states.app.accountInfo['id'],
             {
                 seats: bookingSeats,
             }

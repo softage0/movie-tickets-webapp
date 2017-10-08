@@ -137,6 +137,7 @@ app.get('/logout', function(req, res){
 //
 app.get('/movies', function (req, res) {
     const query = req.query;
+    const bookerId = req.query['bookerId'];
 
     MongoClient.connect(mongodbUrl, function(err, db) {
         assert.equal(null, err);
@@ -147,17 +148,47 @@ app.get('/movies', function (req, res) {
         if (query['theater']) queries.push( { 'theater': query['theater']});
         if (query['showTime']) queries.push( { 'showTime': query['showTime']});
 
-        findDocument(db, 'movies', queries.length ? { $and: queries } : {}, function(err, docs) {
-            db.close();
+        db.collection('movies').find(queries.length ? { $and: queries } : {})
+            .sort([
+                ['movieCd', 1],
+                ['theater', 1],
+                ['showTime', 1],
+            ])
+            .toArray(function (err, moviesInfo) {
+                assert.equal(null, err);
 
-            if (!err) {
-                res.json(docs);
-            }
-        }, [
-            ['movieCd', 1],
-            ['theater', 1],
-            ['showTime', 1],
-        ]);
+                db.collection('booking').find(queries.length ? { $and: queries } : {})
+                    .toArray(function (err, bookingInfo) {
+                        assert.equal(null, err);
+                        db.close();
+
+                        // reserve booked seats per movies
+                        const bookingPerMovies = {};
+                        bookingInfo.forEach((booking) => {
+                            if (bookingPerMovies[booking['movieScheduleId']]) {
+                                bookingPerMovies[booking['movieScheduleId']] = Object
+                                    .assign({}, bookingPerMovies[booking['movieScheduleId']], booking['seats']);
+                            } else {
+                                bookingPerMovies[booking['movieScheduleId']] = {};
+                                bookingPerMovies[booking['movieScheduleId']]['bookedSeats'] = booking['seats'];
+                            }
+
+                            // if bookerId is given, booker's booked seats will be reserved as `myBookedSeats`
+                            if (booking['accountId'] === bookerId) {
+                                bookingPerMovies[booking['movieScheduleId']]['myBookedSeats'] = booking['seats'];
+                            }
+                        });
+
+                        // reserved booked seats are added to each movie info and return
+                        const returnData = [];
+                        moviesInfo.forEach((movie) => {
+                            returnData.push(Object.assign({}, movie, bookingPerMovies[movie['_id']]))
+                        });
+
+                        res.json(returnData);
+
+                    });
+            });
     });
 });
 
