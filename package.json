@@ -4,10 +4,7 @@
   "private": true,
   "proxy": {
     "/api": {
-      "target": "http://localhost:5000",
-      "pathRewrite": {
-        "^/api": "/"
-      }
+      "target": "http://localhost:5000"
     },
     "/kobisopenapi": {
       "target": "http://www.kobis.or.kr/"
@@ -36,6 +33,7 @@
     "start:server": "nodemon server.js",
     "build": "react-scripts build",
     "test": "react-scripts test --env=jsdom",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "heroku-postbuild": "npm run build"
   }
 }

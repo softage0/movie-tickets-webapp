@@ -29,20 +29,17 @@ MongoClient.connect(mongodbUrl, function(err, db) {
     db.close();
 });
 
-
-app.get('/', function(req, res) {
-    res.send('API Server root - It\'s working.');
-});
-
+const apiRouter = express.Router();
+const API_PREFIX = '/api';
 
 //
 // login and session
 //
-app.get('/session', function(req, res) {
+apiRouter.get('/session', function(req, res) {
     res.json(req.session);
 });
 
-app.post('/signUp', function (req, res) {
+apiRouter.post('/signUp', function (req, res) {
     const account = req.body;
 
     if(!account['id'] || !account['password'] || !account['name']){
@@ -74,7 +71,7 @@ app.post('/signUp', function (req, res) {
     });
 });
 
-app.post('/login', function (req, res) {
+apiRouter.post('/login', function (req, res) {
     const account = req.body;
 
     if(!account['id'] || !account['password']){
@@ -116,7 +113,7 @@ app.post('/login', function (req, res) {
     });
 });
 
-app.get('/logout', function(req, res){
+apiRouter.get('/logout', function(req, res){
     const session = req.session;
     if(session.account){
         req.session.destroy(function(err){
@@ -135,7 +132,7 @@ app.get('/logout', function(req, res){
 //
 // movie management
 //
-app.get('/movies', function (req, res) {
+apiRouter.get('/movies', function (req, res) {
     const query = req.query;
     const bookerId = req.query['bookerId'];
 
@@ -191,7 +188,7 @@ app.get('/movies', function (req, res) {
     });
 });
 
-app.get('/movies/:_id/:bookerId', function (req, res) {
+apiRouter.get('/movies/:_id/:bookerId', function (req, res) {
     const _id = req.params._id;
     const bookerId = req.params['bookerId'];
 
@@ -237,7 +234,7 @@ app.get('/movies/:_id/:bookerId', function (req, res) {
     });
 });
 
-app.post('/movies', function (req, res) {
+apiRouter.post('/movies', function (req, res) {
     const movie = req.body;
 
     if(!movie['movieCd'] || !movie['theater'] || !movie['showTime']){
@@ -274,7 +271,7 @@ app.post('/movies', function (req, res) {
     });
 });
 
-app.put('/movies/:id', function (req, res) {
+apiRouter.put('/movies/:id', function (req, res) {
     const movie = Object.assign({}, req.body);
     delete movie._id;
 
@@ -318,7 +315,7 @@ app.put('/movies/:id', function (req, res) {
     });
 });
 
-app.delete('/movies/:id', function (req, res) {
+apiRouter.delete('/movies/:id', function (req, res) {
     if(!req.params.id){
         res.status(500).json({
             error: 'invalid request',
@@ -346,7 +343,7 @@ app.delete('/movies/:id', function (req, res) {
 //
 // booking management
 //
-app.get('/booking/:movieScheduleId/:accountId', function (req, res) {
+apiRouter.get('/booking/:movieScheduleId/:accountId', function (req, res) {
     const movieScheduleId = req.params['movieScheduleId'];
     const accountId = req.params['accountId'];
 
@@ -369,7 +366,7 @@ app.get('/booking/:movieScheduleId/:accountId', function (req, res) {
     });
 });
 
-app.post('/booking/:movieScheduleId/:accountId', function (req, res) {
+apiRouter.post('/booking/:movieScheduleId/:accountId', function (req, res) {
     const movieScheduleId = req.params['movieScheduleId'];
     const accountId = req.params['accountId'];
     const seats = req.body['seats'];
@@ -422,7 +419,7 @@ app.post('/booking/:movieScheduleId/:accountId', function (req, res) {
     });
 });
 
-app.get('/bookingHistory/', function (req, res) {
+apiRouter.get('/bookingHistory/', function (req, res) {
     const accountId = req.query['accountId'];
     const movieScheduleId = req.query['movieScheduleId'];
 
@@ -462,6 +459,8 @@ app.get('/bookingHistory/', function (req, res) {
     });
 });
 
+
+app.use(API_PREFIX, apiRouter);
 
 app.listen(app.get('port'), function() {
     console.log('Node app is running on port', app.get('port'));
