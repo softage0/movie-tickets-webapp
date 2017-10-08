@@ -60,7 +60,7 @@ export class BoxOffice extends Component {
                                     propStates.accountInfo && propStates.accountInfo['type'] === 'customer' &&
                                     <td>
                                         <ButtonToolbar>
-                                            <Button bsSize="xsmall" onClick={() => this.bookMovie(movie['_id'])}>Book</Button>
+                                            <Button bsSize="xsmall" onClick={() => this.bookMovie(movie['_id'])}>Book/Cancel</Button>
                                         </ButtonToolbar>
                                     </td>
                                 }

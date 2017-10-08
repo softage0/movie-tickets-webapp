@@ -162,7 +162,61 @@ app.get('/movies', function (req, res) {
 });
 
 app.get('/movies/:_id/:bookerId', function (req, res) {
-    res.send('return one movie info');
+    const _id = req.params._id;
+    const bookerId = req.params['bookerId'];
+
+    if(!_id){
+        res.status(500).json({
+            error: 'invalid request',
+        });
+        return;
+    }
+
+    MongoClient.connect(mongodbUrl, function(err, db) {
+        assert.equal(null, err);
+
+        // get movie info
+        db.collection('movies').findOne({_id: new ObjectId(_id)}, function(err, movieInfo) {
+            assert.equal(null, err);
+
+            const bookingCol = db.collection('booking');
+
+            // get booked seats info
+            bookingCol.findOne({movieScheduleId: _id}, function(err, bookInfo) {
+                assert.equal(null, err);
+
+                const returnData = bookInfo ?
+                    Object.assign({}, movieInfo, {
+                        bookedSeats: bookInfo['seats'],
+                    })
+                    :
+                    movieInfo;
+
+                // If bookerId is given, myBookedSeats will be added.
+                if (bookerId) {
+                    bookingCol.findOne({
+                        $and: [{
+                            movieScheduleId: _id,
+                            accountId: bookerId,
+                        }],
+                    }, function(err, myBookInfo) {
+                        assert.equal(null, err);
+                        db.close();
+
+                        if (myBookInfo) {
+                            returnData['myBookedSeats'] = myBookInfo['seats'];
+                        }
+
+                        res.json(returnData);
+                    });
+                } else {
+                    db.close();
+
+                    res.json(returnData);
+                }
+            });
+        });
+    });
 });
 
 app.post('/movies', function (req, res) {
@@ -274,35 +328,35 @@ app.delete('/movies/:id', function (req, res) {
 //
 // booking management
 //
-app.get('/booking/:movieScheduleId/:userId', function (req, res) {
+app.get('/booking/:movieScheduleId/:accountId', function (req, res) {
     const movieScheduleId = req.params['movieScheduleId'];
-    const userId = req.params['userId'];
+    const accountId = req.params['accountId'];
 
     MongoClient.connect(mongodbUrl, function(err, db) {
         assert.equal(null, err);
 
-        const queries = [
-            {movieScheduleId: movieScheduleId},
-            {userId: userId},
-        ];
-
-        findDocument(db, 'booking', queries.length ? { $and: queries } : {}, function(err, docs) {
+        db.collection('booking').findOne({
+            $and: [{
+                movieScheduleId: movieScheduleId,
+                accountId: accountId,
+            }],
+        }, function(err, doc) {
+            assert.equal(null, err);
             db.close();
 
             if (!err) {
-                res.json(docs[0]);
+                res.json(doc);
             }
         });
     });
 });
 
-app.post('/booking/:movieScheduleId/:userId', function (req, res) {
+app.post('/booking/:movieScheduleId/:accountId', function (req, res) {
     const movieScheduleId = req.params['movieScheduleId'];
-    const userId = req.params['userId'];
-    const selectedSeats = req.body['selectedSeats'];
-    console.log(selectedSeats);
+    const accountId = req.params['accountId'];
+    const seats = req.body['seats'];
 
-    if(!movieScheduleId || !userId){
+    if(!movieScheduleId || !accountId){
         res.status(500).json({
             error: 'invalid request',
         });
@@ -314,40 +368,21 @@ app.post('/booking/:movieScheduleId/:userId', function (req, res) {
 
         const queries = [];
         if (movieScheduleId) queries.push({movieScheduleId: movieScheduleId});
-        if (userId) queries.push({userId: userId});
+        if (accountId) queries.push({accountId: accountId});
 
         const data = {
             movieScheduleId,
-            userId,
-            selectedSeats,
+            accountId,
+            seats,
         };
 
         db.collection('booking').updateOne({$and: queries}, {$set: data}, {
             upsert: true
-        }, function(err, r) {
+        }, function(err) {
             assert.equal(null, err);
-            assert.equal(1, r.upsertedCount);
-
             db.close();
 
             res.status(204).send('Success: booking info upserted');
-        });
-
-        findDocument(db, 'booking', { $and: queries }, function(err, docs) {
-            if (!err) {
-                if(docs.length){
-                    res.status(409).json({
-                        error: 'conflict',
-                    });
-                    return;
-                }
-
-                insertDocument(db, 'movies', movie, function () {
-                    db.close();
-
-                    res.status(201).send('Success: movie schedule added');
-                });
-            }
         });
     });
 });

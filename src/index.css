@@ -40,7 +40,11 @@ body {
   background-color: #5cb85c;
   border-color: #4cae4c;
   color: #ffffff;
-  cursor: default;
+}
+.booking-seats > tbody > tr > td.canceled {
+  background-color: #d9534f;
+  border-color: #d43f3a;
+  color: #ffffff;
 }
 .booking-seats > tbody > tr > td.booked {
   background-color: #5bc0de;
