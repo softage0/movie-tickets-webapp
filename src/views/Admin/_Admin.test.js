@@ -1,5 +1,3 @@
-jest.mock('../../utils');
-
 import React from 'react';
 import {Button} from 'react-bootstrap';
 import {shallow} from 'enzyme';
@@ -47,6 +45,7 @@ const mockMovies = [{
     "theater": "CGV",
     "showTime": "9PM"
 }];
+
 
 describe('Admin Test', () => {
     test('renders without crashing', () => {

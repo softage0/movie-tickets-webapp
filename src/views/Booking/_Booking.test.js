@@ -1,5 +1,3 @@
-jest.mock('../../utils');
-
 import React from 'react';
 import {ListGroupItem, Button} from 'react-bootstrap';
 import {shallow} from 'enzyme';
@@ -34,6 +32,7 @@ const mockMovieData = {
     "bookedSeats": ["F6", "F7", "D6", "D7", "E6", "E7"],
     "myBookedSeats": ["F6", "F7"]
 };
+
 
 describe('Booking Test', () => {
     test('renders without crashing', () => {

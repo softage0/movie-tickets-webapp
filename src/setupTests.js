@@ -20,3 +20,6 @@ Object.entries = (obj) => {
     }
     return entries;
 };
+
+// mocking `fetch` responses
+jest.mock('./utils');

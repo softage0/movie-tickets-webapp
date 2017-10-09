@@ -1,5 +1,3 @@
-jest.mock('../../utils');
-
 import React from 'react';
 import {shallow} from 'enzyme';
 
@@ -18,6 +16,7 @@ const mockMovieHistory = [{
     "theater": "CGV",
     "showTime": "12PM"
 }];
+
 
 describe('BoxOffice Test', () => {
     test('renders without crashing', () => {

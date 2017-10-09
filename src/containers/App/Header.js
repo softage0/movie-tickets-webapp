@@ -5,7 +5,7 @@ import {Nav, Navbar, NavItem} from 'react-bootstrap';
 import utils from '../../utils';
 
 
-class Header extends Component {
+export class Header extends Component {
     constructor(props) {
         super(props);
 

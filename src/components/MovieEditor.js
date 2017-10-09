@@ -28,6 +28,7 @@ class MovieEditor extends Component {
             '/kobisopenapi/webservice/rest/boxoffice/searchDailyBoxOfficeList.json',
             {
                 key: process.env.REACT_APP_KOBIS_KEY,
+                // 최근날짜의 경우 시간대에 따라 Open API에서 영화정보를 보내주지 않는 문제가 있어 날짜를 고정
                 targetDt: '20171005' || utils.getYyyymmdd(),
             },
         ).then((response) => {
