@@ -1,6 +1,7 @@
 import React, {Component} from 'react';
 import {withRouter} from 'react-router-dom';
 import {Form, Button} from 'react-bootstrap';
+import swal from 'sweetalert2';
 
 import utils from '../../utils';
 import FieldGroup from '../../components/FieldGroup';
@@ -38,6 +39,15 @@ export class Login extends Component {
         const propActions = this.props.actions.app;
         let params = this.state;
 
+        if (!params['id'] || !params['password'] || (type === 'signUp' && !params['name'])) {
+            swal({
+                title: 'Please fill in all fields.',
+                type: 'warning',
+                showConfirmButton: false,
+                timer: 1000,
+            }).catch(swal.noop);
+            return;
+        }
 
         if (type === 'signUp') {
             params = Object.assign({}, params, {
@@ -50,8 +60,51 @@ export class Login extends Component {
             type === 'login' ? '/api/login' : '/api/signUp',
             params,
         ).then(function (response) {
-            propActions.setAccountInfo(response);
-            type === 'login' ? history.push('/') : history.push('/login');
+            if(!response || !response.status) {
+                propActions.setAccountInfo(response);
+                if (type === 'login') {
+                    if (response['type'] === 'admin') {
+                        history.push('/admin');
+                    } else {
+                        history.push('/');
+                    }
+                } else {
+                    history.push('/login');
+                }
+                swal({
+                    title: response && response['name'] ?
+                        response['name'] + ' successfully logged in.' : 'Sign up succeeded.',
+                    type: 'success',
+                    showConfirmButton: false,
+                    timer: 1000,
+                }).catch(swal.noop);
+            } else {
+                switch (response.status) {
+                    case 404:
+                        swal({
+                            title: 'ID doesn\'t exist.',
+                            type: 'warning',
+                        });
+                        break;
+                    case 409:
+                        swal({
+                            title: 'ID already exists.',
+                            type: 'warning',
+                        });
+                        break;
+                    case 412:
+                        swal({
+                            title: 'Incorrect Password',
+                            type: 'warning',
+                        });
+                        break;
+                    default:
+                        swal({
+                            title: 'Unknown Error',
+                            type: 'warning',
+                        });
+                }
+            }
         });
     }
 

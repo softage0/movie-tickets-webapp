@@ -1,6 +1,7 @@
 import React, {Component} from 'react';
 import {withRouter} from 'react-router-dom';
 import {ListGroup, ListGroupItem, Table, ButtonToolbar, Button} from 'react-bootstrap';
+import swal from 'sweetalert2';
 
 import utils from '../../utils';
 
@@ -102,8 +103,21 @@ export class Booking extends Component {
                 bookingSeats,
                 cancelingSeats,
             }
-        ).then(() => {
-            this.getMovie();
+        ).then((response) => {
+            if(!response || !response.status) {
+                this.getMovie();
+                swal({
+                    title: 'Book/Cancel succeeded',
+                    type: 'success',
+                    showConfirmButton: false,
+                    timer: 1000,
+                }).catch(swal.noop);
+            } else {
+                swal({
+                    title: 'Book/Cancel failed',
+                    type: 'warning',
+                });
+            }
         })
     }
 

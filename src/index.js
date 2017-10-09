@@ -1,5 +1,6 @@
 import 'bootstrap/dist/css/bootstrap.css';
 // import 'bootstrap/dist/css/bootstrap-theme.css';
+import 'sweetalert2/dist/sweetalert2.min.css';
 
 import React from 'react';
 import ReactDOM from 'react-dom';

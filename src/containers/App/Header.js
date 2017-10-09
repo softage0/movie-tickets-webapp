@@ -1,6 +1,7 @@
 import React, {Component} from 'react';
 import {Link, withRouter} from 'react-router-dom';
 import {Nav, Navbar, NavItem} from 'react-bootstrap';
+import swal from 'sweetalert2';
 
 import utils from '../../utils';
 
@@ -18,8 +19,22 @@ export class Header extends Component {
         utils.fetch(
             'get',
             '/api/logout',
-        ).then(function () {
-            propActions.setAccountInfo();
+        ).then((response) => {
+            if (!response.status) {
+                propActions.setAccountInfo();
+                this.props.history.push('/');
+                swal({
+                    title: 'Logout succeeded',
+                    type: 'success',
+                    showConfirmButton: false,
+                    timer: 1000,
+                }).catch(swal.noop);
+            } else {
+                swal({
+                    title: 'Logout failed',
+                    type: 'warning',
+                });
+            }
         });
     }
 

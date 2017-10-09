@@ -1,6 +1,7 @@
 import React, {Component} from 'react';
 import {withRouter} from 'react-router-dom';
 import {Table, ButtonToolbar, Button} from 'react-bootstrap';
+import swal from 'sweetalert2';
 
 import utils from '../../utils';
 import MovieEditor from '../../components/MovieEditor';
@@ -74,6 +75,17 @@ export class Admin extends Component {
             if(!response || !response.status) {
                 this.cancelEdit();
                 this.getMovies();
+                swal({
+                    title: 'Delete succeeded',
+                    type: 'success',
+                    showConfirmButton: false,
+                    timer: 1000,
+                }).catch(swal.noop);
+            } else {
+                swal({
+                    title: 'Delete failed',
+                    type: 'warning',
+                });
             }
         });
     }
@@ -90,6 +102,26 @@ export class Admin extends Component {
                 if(!response || !response.status) {
                     this.cancelEdit();
                     this.getMovies();
+                    swal({
+                        title: 'Movie schedule has been successfully added.',
+                        type: 'success',
+                        showConfirmButton: false,
+                        timer: 1000,
+                    }).catch(swal.noop);
+                } else {
+                    switch (response.status) {
+                        case 409:
+                            swal({
+                                title: 'Movie schedule already exists.',
+                                type: 'warning',
+                            });
+                            break;
+                        default:
+                            swal({
+                                title: 'Unknown Error',
+                                type: 'warning',
+                            });
+                    }
                 }
             });
         } else {
@@ -101,6 +133,26 @@ export class Admin extends Component {
                 if(!response || !response.status) {
                     this.cancelEdit();
                     this.getMovies();
+                    swal({
+                        title: 'Movie schedule has been successfully modified.',
+                        type: 'success',
+                        showConfirmButton: false,
+                        timer: 1000,
+                    }).catch(swal.noop);
+                } else {
+                    switch (response.status) {
+                        case 409:
+                            swal({
+                                title: 'Movie schedule already exists.',
+                                type: 'warning',
+                            });
+                            break;
+                        default:
+                            swal({
+                                title: 'Unknown Error',
+                                type: 'warning',
+                            });
+                    }
                 }
             });
         }
