@@ -6,7 +6,7 @@ import utils from '../../utils';
 import MovieEditor from '../../components/MovieEditor';
 
 
-export class BoxOffice extends Component {
+export class Admin extends Component {
     constructor(props) {
         super(props);
 
@@ -198,4 +198,4 @@ export class BoxOffice extends Component {
     }
 }
 
-export default withRouter(BoxOffice);
+export default withRouter(Admin);
