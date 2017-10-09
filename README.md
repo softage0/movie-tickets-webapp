@@ -2,9 +2,9 @@
 
 Movie Tickets Booking web application using React, Node.js, MongoDB and Express
 
-> 본 프로젝트는 데모용 [Heroku server](https://movie-tickets-booking.herokuapp.com/)에 접근하여 실행 및 테스트를 해볼 수 있다.
-> admin id/password - `admin`/`admin`
-> customer id/password - `tester`/`1234`
+> 본 프로젝트는 데모용 [Heroku server](https://movie-tickets-booking.herokuapp.com/)에 접근하여 실행 및 테스트를 해볼 수 있다. <br/>
+> admin id/password - `admin`/`admin` <br/>
+> customer id/password - `tester`/`1234` <br/>
 > customer 계정은 `Sign Up` 메뉴에서 추가 가능
 
 
@@ -14,7 +14,7 @@ Movie Tickets Booking web application using React, Node.js, MongoDB and Express
 * 영화 티켓 예매 사이트 front page
     * 관리자와 사용자 모두 쓸 수 있는 로그인 기반 시스템
     * 관리자
-        * id는 admin, 이름은 `관리자`로 고정
+        * id는 `admin`, 이름은 `관리자`로 고정
         * 영화, 상영관, 상영시간 등을 등록, 수정할 수 있음
     * 사용자
         * 시간 및 자리 선택해서 예매
@@ -59,7 +59,7 @@ CI={Optional. 서버에서는 true. true일 경우 `npm test` 명령이 unattend
 ```
 
 
-본 프로젝트는 Front/Back-end가 분리되어 각각 port 5000과 3000번에서 실행되며 개발과정의 편의를 위해 `두 개의 터미널 프로세스`에서 아래 명령으로 각각 실행하는 것을 추천한다.
+본 프로젝트는 Front/Back-end가 분리되어 각각 port 5000과 3000번에서 실행되며 개발과정의 편의를 위해 **두 개의 터미널 프로세스**에서 아래 명령으로 각각 실행하는 것을 추천한다.
 
 ### Front-end 실행 - React/Webpack
 아래 명령으로 `localhost:3000`에 Front-end 코드가 실행되며 `Webpack`으로 watch 한다.
@@ -138,7 +138,7 @@ $ node server.js
 아래의 과정을 직접 또는 shell/CI script 등으로 실행한다.
 
 1. 특정 위치에 git clone
-1. .env 설정 **필수 - `npm test`를 실행할 경우 반드시 `CI=true`가 포함되어 있어야한다.**
+1. .env 설정 **(필수 - `npm test`를 실행할 경우 반드시 `CI=true`가 포함되어 있어야한다.)**
 1. npm install 실행
 1. npm run build 실행
 1. npm test 실행 _(optional)_

@@ -89,7 +89,7 @@ export class BoxOffice extends Component {
                             </thead>
                             <tbody>
                             {
-                                movies.map((movie) => <tr key={movie['_id']}>
+                                movies.length ? movies.map((movie) => <tr key={movie['_id']}>
                                     <td>{movie['movieNm']}</td>
                                     <td>{movie['theater']}</td>
                                     <td>{movie['showTime']}</td>
@@ -100,7 +100,7 @@ export class BoxOffice extends Component {
                                             <Button bsSize="xsmall" onClick={() => this.bookMovie(movie['_id'])}>Book/Cancel</Button>
                                         </ButtonToolbar>
                                     </td>
-                                </tr>)
+                                </tr>) : <tr/>
                             }
                             </tbody>
                         </Table>
@@ -116,12 +116,12 @@ export class BoxOffice extends Component {
                             </thead>
                             <tbody>
                             {
-                                movies.map((movie) => <tr key={movie['_id']}>
+                                movies.length ? movies.map((movie) => <tr key={movie['_id']}>
                                     <td>{movie['movieNm']}</td>
                                     <td>{movie['theater']}</td>
                                     <td>{movie['showTime']}</td>
                                     <td>{movie['bookedSeats'] && movie['bookedSeats'].join(', ')}</td>
-                                </tr>)
+                                </tr>) : <tr/>
                             }
                             </tbody>
                         </Table>
