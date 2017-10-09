@@ -11,6 +11,15 @@ const propsHistory = {
     push: jest.fn(),
 };
 
+const states = {
+    app: {
+        accountInfo: {
+            id: 'admin',
+            type: 'admin',
+        },
+    },
+};
+
 const mockMovies = [{
     "_id": "59d8b30bbfb1513a12ae195b",
     "movieCd": "20171817",
@@ -41,31 +50,16 @@ const mockMovies = [{
 
 describe('Admin Test', () => {
     test('renders without crashing', () => {
-        const states = {
-            app: {
-                accountInfo: null,
-            },
-        };
         shallow(<Admin states={states} history={propsHistory}/>);
     });
 
     test('Admin contains `Movie Management` table', () => {
-        const states = {
-            app: {
-                accountInfo: null,
-            },
-        };
         const wrapper = shallow(<Admin states={states} history={propsHistory}/>);
 
         expect(wrapper.contains(<h1>Admin Page - Movie Management</h1>)).toEqual(true);
     });
 
     test('`MovieEditor` show/hide test', () => {
-        const states = {
-            app: {
-                accountInfo: null,
-            },
-        };
         const wrapper = shallow(<Admin states={states} history={propsHistory}/>);
         wrapper.setState({
             movies: mockMovies,
