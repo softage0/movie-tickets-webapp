@@ -68,7 +68,7 @@ export class Login extends Component {
                 'post',
                 type === 'login' ? '/api/login' : '/api/signUp',
                 params,
-            ).then(function (response) {
+            ).then((response) => {
                 if(!response || !response.status) {
                     propActions.setAccountInfo(response);
                     if (type === 'login') {
@@ -113,10 +113,10 @@ export class Login extends Component {
                                 type: 'warning',
                             });
                     }
-                    this.setState({
-                        ajaxFetching: false,
-                    });
                 }
+                this.setState({
+                    ajaxFetching: false,
+                });
             });
         });
 

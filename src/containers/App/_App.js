@@ -26,7 +26,7 @@ class App extends Component {
         utils.fetch(
             'get',
             '/api/session',
-        ).then(function (response) {
+        ).then((response) => {
             if (response.account) {
                 propActions.setAccountInfo(response.account);
             }
