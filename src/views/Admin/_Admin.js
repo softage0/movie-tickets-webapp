@@ -15,6 +15,7 @@ export class Admin extends Component {
             mode: 'view',
             movies: [],
             movieDetails: null,
+            ajaxFetching: false,
         };
 
         this.onChangeMovieDetails = this.onChangeMovieDetails.bind(this);
@@ -43,14 +44,19 @@ export class Admin extends Component {
     }
 
     getMovies() {
-        utils.fetch(
-            'get',
-            '/api/movies',
-        ).then((movies) => {
-            this.setState({
-                movies,
-            })
-        })
+        this.setState({
+            ajaxFetching: true,
+        }, () => {
+            utils.fetch(
+                'get',
+                '/api/movies',
+            ).then((movies) => {
+                this.setState({
+                    movies,
+                    ajaxFetching: false,
+                })
+            });
+        });
     }
 
     addMovie() {
@@ -68,94 +74,113 @@ export class Admin extends Component {
     }
 
     deleteMovie(_id) {
-        utils.fetch(
-            'delete',
-            '/api/movies/' + _id,
-        ).then((response) => {
-            if(!response || !response.status) {
-                this.cancelEdit();
-                this.getMovies();
-                swal({
-                    title: 'Delete succeeded',
-                    type: 'success',
-                    showConfirmButton: false,
-                    timer: 1000,
-                }).catch(swal.noop);
-            } else {
-                swal({
-                    title: 'Delete failed',
-                    type: 'warning',
-                });
-            }
+        this.setState({
+            ajaxFetching: true,
+        }, () => {
+            utils.fetch(
+                'delete',
+                '/api/movies/' + _id,
+            ).then((response) => {
+                if(!response || !response.status) {
+                    this.cancelEdit();
+                    this.getMovies();
+                    swal({
+                        title: 'Delete succeeded',
+                        type: 'success',
+                        showConfirmButton: false,
+                        timer: 1000,
+                    }).catch(swal.noop);
+                } else {
+                    swal({
+                        title: 'Delete failed',
+                        type: 'warning',
+                    });
+                    this.setState({
+                        ajaxFetching: false,
+                    });
+                }
+            });
         });
+
+
     }
 
     saveMovie() {
-        const movieDetails = this.state.movieDetails;
+        const {movieDetails} = this.state;
 
-        if (this.state.mode === 'add') {
-            utils.fetch(
-                'post',
-                '/api/movies/',
-                movieDetails,
-            ).then((response) => {
-                if(!response || !response.status) {
-                    this.cancelEdit();
-                    this.getMovies();
-                    swal({
-                        title: 'Movie schedule has been successfully added.',
-                        type: 'success',
-                        showConfirmButton: false,
-                        timer: 1000,
-                    }).catch(swal.noop);
-                } else {
-                    switch (response.status) {
-                        case 409:
-                            swal({
-                                title: 'Movie schedule already exists.',
-                                type: 'warning',
-                            });
-                            break;
-                        default:
-                            swal({
-                                title: 'Unknown Error',
-                                type: 'warning',
-                            });
+        this.setState({
+            ajaxFetching: true,
+        }, () => {
+            if (this.state.mode === 'add') {
+                utils.fetch(
+                    'post',
+                    '/api/movies/',
+                    movieDetails,
+                ).then((response) => {
+                    if (!response || !response.status) {
+                        this.cancelEdit();
+                        this.getMovies();
+                        swal({
+                            title: 'Movie schedule has been successfully added.',
+                            type: 'success',
+                            showConfirmButton: false,
+                            timer: 1000,
+                        }).catch(swal.noop);
+                    } else {
+                        switch (response.status) {
+                            case 409:
+                                swal({
+                                    title: 'Movie schedule already exists.',
+                                    type: 'warning',
+                                });
+                                break;
+                            default:
+                                swal({
+                                    title: 'Unknown Error',
+                                    type: 'warning',
+                                });
+                        }
+                        this.setState({
+                            ajaxFetching: false,
+                        });
                     }
-                }
-            });
-        } else {
-            utils.fetch(
-                'put',
-                '/api/movies/' + movieDetails['_id'],
-                movieDetails,
-            ).then((response) => {
-                if(!response || !response.status) {
-                    this.cancelEdit();
-                    this.getMovies();
-                    swal({
-                        title: 'Movie schedule has been successfully modified.',
-                        type: 'success',
-                        showConfirmButton: false,
-                        timer: 1000,
-                    }).catch(swal.noop);
-                } else {
-                    switch (response.status) {
-                        case 409:
-                            swal({
-                                title: 'Movie schedule already exists.',
-                                type: 'warning',
-                            });
-                            break;
-                        default:
-                            swal({
-                                title: 'Unknown Error',
-                                type: 'warning',
-                            });
+                });
+            } else {
+                utils.fetch(
+                    'put',
+                    '/api/movies/' + movieDetails['_id'],
+                    movieDetails,
+                ).then((response) => {
+                    if(!response || !response.status) {
+                        this.cancelEdit();
+                        this.getMovies();
+                        swal({
+                            title: 'Movie schedule has been successfully modified.',
+                            type: 'success',
+                            showConfirmButton: false,
+                            timer: 1000,
+                        }).catch(swal.noop);
+                    } else {
+                        switch (response.status) {
+                            case 409:
+                                swal({
+                                    title: 'Movie schedule already exists.',
+                                    type: 'warning',
+                                });
+                                break;
+                            default:
+                                swal({
+                                    title: 'Unknown Error',
+                                    type: 'warning',
+                                });
+                        }
+                        this.setState({
+                            ajaxFetching: false,
+                        });
                     }
-                }
-            });
-        }
+                });
+            }
+        });
     }
 
     cancelEdit() {
@@ -166,7 +191,8 @@ export class Admin extends Component {
     }
 
     render() {
-        let movies = this.state.movies;
+        const {ajaxFetching} = this.state;
+        let {movies} = this.state;
 
         if (this.state.mode === 'edit') {
             const editingId = this.state.movieDetails['_id'];
@@ -185,6 +211,12 @@ export class Admin extends Component {
 
         return (
             <div>
+                {
+                    ajaxFetching &&
+                    <div className="loading-wrapper">
+                        <div className="loading-indicator"/>
+                    </div>
+                }
                 <h1>Admin Page - Movie Management</h1>
                 <Table striped bordered condensed hover>
                     <thead>

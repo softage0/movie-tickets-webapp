@@ -14,6 +14,7 @@ class MovieEditor extends Component {
             theaters: ['CGV', 'Lotte Cinema', 'Megabox'],
             showTimes: ['7AM', '12PM', '3PM', '9PM'],
             movieDetails: {},
+            ajaxFetching: false,
         };
 
         this.handleChange = this.handleChange.bind(this);
@@ -22,30 +23,39 @@ class MovieEditor extends Component {
     componentDidMount() {
         const {movieDetails} = this.props;
 
-        // get active movie list from `kobis.or.kr`
-        utils.fetch(
-            'get',
-            '/kobisopenapi/webservice/rest/boxoffice/searchDailyBoxOfficeList.json',
-            {
-                key: process.env.REACT_APP_KOBIS_KEY,
-                // 최근날짜의 경우 시간대에 따라 Open API에서 영화정보를 보내주지 않는 문제가 있어 날짜를 고정
-                targetDt: '20171005' || utils.getYyyymmdd(),
-            },
-        ).then((response) => {
-            this.setState({
-                boxOfficeList: response['boxOfficeResult']['dailyBoxOfficeList'],
-            }, () => {
-                if (movieDetails) {
-                    this.setState({
-                        movieDetails,
-                    }, () => {
-                        if (this.props.onChange) {
-                            this.props.onChange(this.state.movieDetails);
-                        }
-                    });
-                }
+        this.setState({
+            ajaxFetching: true,
+        }, () => {
+            // get active movie list from `kobis.or.kr`
+            utils.fetch(
+                'get',
+                '/kobisopenapi/webservice/rest/boxoffice/searchDailyBoxOfficeList.json',
+                {
+                    key: process.env.REACT_APP_KOBIS_KEY,
+                    // 최근날짜의 경우 시간대에 따라 Open API에서 영화정보를 보내주지 않는 문제가 있어 날짜를 고정
+                    targetDt: '20171005' || utils.getYyyymmdd(),
+                },
+            ).then((response) => {
+                this.setState({
+                    boxOfficeList: response['boxOfficeResult']['dailyBoxOfficeList'],
+                }, () => {
+                    if (movieDetails) {
+                        this.setState({
+                            movieDetails,
+                            ajaxFetching: false,
+                        }, () => {
+                            if (this.props.onChange) {
+                                this.props.onChange(this.state.movieDetails);
+                            }
+                        });
+                    } else {
+                        this.setState({
+                            ajaxFetching: false,
+                        });
+                    }
+                })
             })
-        })
+        });
     }
 
     componentWillReceiveProps(nextProps) {
@@ -84,10 +94,16 @@ class MovieEditor extends Component {
     }
 
     render() {
-        const {movieDetails} = this.state;
+        const {movieDetails, ajaxFetching} = this.state;
 
         return (
-            <Form componentClass="fieldset" horizontal>
+            <Form className="pos-r" componentClass="fieldset" horizontal>
+                {
+                    ajaxFetching &&
+                    <div className="loading-wrapper">
+                        <div className="loading-indicator"/>
+                    </div>
+                }
                 <FieldGroup
                     id="movieCd"
                     value={movieDetails['movieCd']}

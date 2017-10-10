@@ -15,6 +15,7 @@ export class Login extends Component {
             id: null,
             password: null,
             name: null,
+            ajaxFetching: false,
         };
 
         this.handleChange = this.handleChange.bind(this);
@@ -37,7 +38,12 @@ export class Login extends Component {
     submit() {
         const {type, history} = this.props;
         const propActions = this.props.actions.app;
-        let params = this.state;
+        const {id, password, name} = this.state;
+        let params = {
+            id,
+            password,
+            name,
+        };
 
         if (!params['id'] || !params['password'] || (type === 'signUp' && !params['name'])) {
             swal({
@@ -55,64 +61,79 @@ export class Login extends Component {
             });
         }
 
-        utils.fetch(
-            'post',
-            type === 'login' ? '/api/login' : '/api/signUp',
-            params,
-        ).then(function (response) {
-            if(!response || !response.status) {
-                propActions.setAccountInfo(response);
-                if (type === 'login') {
-                    if (response['type'] === 'admin') {
-                        history.push('/admin');
+        this.setState({
+            ajaxFetching: true,
+        }, () => {
+            utils.fetch(
+                'post',
+                type === 'login' ? '/api/login' : '/api/signUp',
+                params,
+            ).then(function (response) {
+                if(!response || !response.status) {
+                    propActions.setAccountInfo(response);
+                    if (type === 'login') {
+                        if (response['type'] === 'admin') {
+                            history.push('/admin');
+                        } else {
+                            history.push('/');
+                        }
                     } else {
-                        history.push('/');
+                        history.push('/login');
                     }
+                    swal({
+                        title: response && response['name'] ?
+                            response['name'] + ' successfully logged in.' : 'Sign up succeeded.',
+                        type: 'success',
+                        showConfirmButton: false,
+                        timer: 1000,
+                    }).catch(swal.noop);
                 } else {
-                    history.push('/login');
+                    switch (response.status) {
+                        case 404:
+                            swal({
+                                title: 'ID doesn\'t exist.',
+                                type: 'warning',
+                            });
+                            break;
+                        case 409:
+                            swal({
+                                title: 'ID already exists.',
+                                type: 'warning',
+                            });
+                            break;
+                        case 412:
+                            swal({
+                                title: 'Incorrect Password',
+                                type: 'warning',
+                            });
+                            break;
+                        default:
+                            swal({
+                                title: 'Unknown Error',
+                                type: 'warning',
+                            });
+                    }
+                    this.setState({
+                        ajaxFetching: false,
+                    });
                 }
-                swal({
-                    title: response && response['name'] ?
-                        response['name'] + ' successfully logged in.' : 'Sign up succeeded.',
-                    type: 'success',
-                    showConfirmButton: false,
-                    timer: 1000,
-                }).catch(swal.noop);
-            } else {
-                switch (response.status) {
-                    case 404:
-                        swal({
-                            title: 'ID doesn\'t exist.',
-                            type: 'warning',
-                        });
-                        break;
-                    case 409:
-                        swal({
-                            title: 'ID already exists.',
-                            type: 'warning',
-                        });
-                        break;
-                    case 412:
-                        swal({
-                            title: 'Incorrect Password',
-                            type: 'warning',
-                        });
-                        break;
-                    default:
-                        swal({
-                            title: 'Unknown Error',
-                            type: 'warning',
-                        });
-                }
-            }
+            });
         });
+
     }
 
     render() {
         const {type} = this.props;
+        const {ajaxFetching} = this.state;
 
         return (
-            <div>
+            <div className="pos-r">
+                {
+                    ajaxFetching &&
+                    <div className="loading-wrapper">
+                        <div className="loading-indicator"/>
+                    </div>
+                }
                 <h1>{type === 'login' ? 'Login' : 'Sign Up'}</h1>
                 <div>
                     <Form componentClass="fieldset" horizontal>

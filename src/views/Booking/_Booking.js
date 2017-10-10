@@ -16,6 +16,7 @@ export class Booking extends Component {
         this.state = {
             movieDetails: null,
             seatsStatus: {},
+            ajaxFetching: false,
         };
 
         this.toggleSelection = this.toggleSelection.bind(this);
@@ -55,25 +56,30 @@ export class Booking extends Component {
     }
 
     getMovie() {
-        utils.fetch(
-            'get',
-            '/api/movies/' + this.props.match.params['_id'] + '/' + this.props.states.app.accountInfo['id'],
-        ).then((movieDetails) => {
-            const bookedSeatsStatus = {};
+        this.setState({
+            ajaxFetching: true,
+        }, () => {
+            utils.fetch(
+                'get',
+                '/api/movies/' + this.props.match.params['_id'] + '/' + this.props.states.app.accountInfo['id'],
+            ).then((movieDetails) => {
+                const bookedSeatsStatus = {};
 
-            movieDetails['bookedSeats'] && movieDetails['bookedSeats'].forEach((seat) => {
-                bookedSeatsStatus[seat] = 'booked';
-            });
+                movieDetails['bookedSeats'] && movieDetails['bookedSeats'].forEach((seat) => {
+                    bookedSeatsStatus[seat] = 'booked';
+                });
 
-            movieDetails['myBookedSeats'] && movieDetails['myBookedSeats'].forEach((seat) => {
-                bookedSeatsStatus[seat] = 'myBooked';
-            });
+                movieDetails['myBookedSeats'] && movieDetails['myBookedSeats'].forEach((seat) => {
+                    bookedSeatsStatus[seat] = 'myBooked';
+                });
 
-            this.setState({
-                movieDetails,
-                seatsStatus: bookedSeatsStatus,
+                this.setState({
+                    movieDetails,
+                    seatsStatus: bookedSeatsStatus,
+                    ajaxFetching: false,
+                })
             })
-        })
+        });
     }
 
     bookSeats() {
@@ -95,34 +101,42 @@ export class Booking extends Component {
             }
         }
 
-        utils.fetch(
-            'post',
-            '/api/booking/' + this.props.match.params['_id'] + '/' + this.props.states.app.accountInfo['id'],
-            {
-                seats: overallBookingSeats,
-                bookingSeats,
-                cancelingSeats,
-            }
-        ).then((response) => {
-            if(!response || !response.status) {
-                this.getMovie();
-                swal({
-                    title: 'Book/Cancel succeeded',
-                    type: 'success',
-                    showConfirmButton: false,
-                    timer: 1000,
-                }).catch(swal.noop);
-            } else {
-                swal({
-                    title: 'Book/Cancel failed',
-                    type: 'warning',
-                });
-            }
-        })
+        this.setState({
+            ajaxFetching: true,
+        }, () => {
+            utils.fetch(
+                'post',
+                '/api/booking/' + this.props.match.params['_id'] + '/' + this.props.states.app.accountInfo['id'],
+                {
+                    seats: overallBookingSeats,
+                    bookingSeats,
+                    cancelingSeats,
+                }
+            ).then((response) => {
+                if (!response || !response.status) {
+                    this.getMovie();
+                    swal({
+                        title: 'Book/Cancel succeeded',
+                        type: 'success',
+                        showConfirmButton: false,
+                        timer: 1000,
+                    }).catch(swal.noop);
+                } else {
+                    swal({
+                        title: 'Book/Cancel failed',
+                        type: 'warning',
+                    });
+                    this.setState({
+                        ajaxFetching: false,
+                    });
+                }
+            });
+        });
+
     }
 
     render() {
-        const {movieDetails, seatsStatus} = this.state;
+        const {movieDetails, seatsStatus, ajaxFetching} = this.state;
         const selectedSeats = [];
         const canceledSeats = [];
 
@@ -136,7 +150,13 @@ export class Booking extends Component {
         }
 
         return (
-            <div>
+            <div className="pos-r">
+                {
+                    ajaxFetching &&
+                    <div className="loading-wrapper">
+                        <div className="loading-indicator"/>
+                    </div>
+                }
                 {movieDetails ?
                     <div>
                         <h1>Booking Seats - {movieDetails.movieNm}</h1>

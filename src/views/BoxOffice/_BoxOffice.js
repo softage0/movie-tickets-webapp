@@ -12,6 +12,7 @@ export class BoxOffice extends Component {
         this.state = {
             movies: [],
             bookingHistory: null,
+            ajaxFetching: false,
         };
 
         this.getDashboardInfo = this.getDashboardInfo.bind(this);
@@ -33,34 +34,41 @@ export class BoxOffice extends Component {
         const accountInfo = props.states.app.accountInfo;
         const accountId = accountInfo && accountInfo['id'];
 
-        utils.fetch(
-            'get',
-            '/api/movies',
-            accountId && {
-                bookerId: accountId,
-            }
-        ).then((movies) => {
-            if (accountId) {
-                utils.fetch(
-                    'get',
-                    '/api/bookingHistory',
-                    // if account is admin type, return all histories.
-                    accountInfo['type'] === 'customer' && {
-                        accountId,
-                    }
-                ).then((history) => {
+        this.setState({
+            ajaxFetching: true,
+        }, () => {
+            utils.fetch(
+                'get',
+                '/api/movies',
+                accountId && {
+                    bookerId: accountId,
+                }
+            ).then((movies) => {
+                if (accountId) {
+                    utils.fetch(
+                        'get',
+                        '/api/bookingHistory',
+                        // if account is admin type, return all histories.
+                        accountInfo['type'] === 'customer' && {
+                            accountId,
+                        }
+                    ).then((history) => {
+                        this.setState({
+                            movies,
+                            bookingHistory: history,
+                            ajaxFetching: false,
+                        })
+                    });
+                } else {
                     this.setState({
                         movies,
-                        bookingHistory: history,
+                        bookingHistory: null,
+                        ajaxFetching: false,
                     })
-                });
-            } else {
-                this.setState({
-                    movies,
-                    bookingHistory: null,
-                })
-            }
+                }
+            });
         });
+
     }
 
     bookMovie(_id) {
@@ -69,10 +77,16 @@ export class BoxOffice extends Component {
 
     render() {
         const propStates = this.props.states.app;
-        const {movies, bookingHistory} = this.state;
+        const {movies, bookingHistory, ajaxFetching} = this.state;
 
         return (
-            <div>
+            <div className="pos-r">
+                {
+                    ajaxFetching &&
+                    <div className="loading-wrapper">
+                        <div className="loading-indicator"/>
+                    </div>
+                }
                 <h1>Box Office Status</h1>
                 {
                     propStates.accountInfo && propStates.accountInfo['type'] === 'customer' ?
